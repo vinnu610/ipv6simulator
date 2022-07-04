@@ -108,7 +108,7 @@ export function useConnectIoTCentralClient(): [
           credentials.deviceKey,
           eventLogger.current,
         );
-        console.log('setting client');
+
         iotc.setLogging(IOTC_LOGGING.ALL);
       } else {
         Debug(
@@ -133,10 +133,9 @@ export function useConnectIoTCentralClient(): [
           timeout: 30,
           cancellationToken: connectRequest.current,
         });
-        console.log('connected');
+
         setClient(iotc);
       } catch (err) {
-        console.log('errore');
         Debug(
           `Error connecting IoTC Client: ${err}`,
           '_connect_internal',
@@ -162,12 +161,11 @@ export function useConnectIoTCentralClient(): [
             credentialsData,
             options?.encryptionKey,
           );
-          console.log(`Decripted: ${JSON.stringify(credentials)}`);
         }
         await _connect_internal(credentials);
         await saveCredentials({credentials});
       } catch (err) {
-        console.log(err);
+        Debug(`Error evaluating QR Code: ${err}`, 'connect', 'outer_catch');
         setError(err);
         setConnecting(false);
       }

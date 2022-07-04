@@ -24,6 +24,7 @@ interface IQRCodeScanner {
 export type IQRCodeProps = QRCodeScannerProps & {
   onRead: (e: Event) => void | Promise<void>;
   onClose?: () => void | Promise<void>;
+  error?: any;
   bottomContent?: JSX.Element;
 };
 
@@ -85,84 +86,98 @@ export default class QRCodeScanner
             this.props.width > this.props.height ? sideWidth - verticals : 0,
         }} // hack: margin is needed when in landscape
         topContent={
-          <View
-            style={{
-              position: 'relative',
-              height: this.props.height,
-              width: this.props.width,
-            }}>
-            <View
-              key="left"
-              style={{
-                height: this.props.height + 80,
-                backgroundColor: 'rgba(0,0,0,.5)',
-                width: sideWidth,
-                left: 0,
-                position: 'absolute',
-                top: 0,
-              }}
-            />
-            <View
-              key="right"
-              style={{
-                height: this.props.height + 80,
-                backgroundColor: 'rgba(0,0,0,.5)',
-                width: sideWidth,
-                right: 0,
-                position: 'absolute',
-                top: 0,
-              }}
-            />
-            <View
-              key="top"
-              style={{
-                marginHorizontal: sideWidth,
-                width: this.props.markerSize,
-                backgroundColor: 'rgba(0,0,0,.5)',
-                height: verticals + 40,
-                top: 0,
-                position: 'absolute',
-              }}
-            />
-            <View
-              key="bottom"
-              style={{
-                marginHorizontal: sideWidth,
-                width: this.props.markerSize,
-                backgroundColor: 'rgba(0,0,0,.5)',
-                height: verticals + 40,
-                bottom: -80,
-                position: 'absolute',
-              }}
-            />
-            {this.onClose && (
-              <Icon
-                name="close-circle-outline"
-                type={Platform.select({
-                  ios: 'ionicon',
-                  android: 'material-community',
-                })}
-                size={40}
-                color="black"
-                containerStyle={{
-                  position: 'absolute',
-                  top: verticals - 40,
-                  right: sideWidth - 40,
-                }}
-                onPress={this.onClose}
-              />
+          <>
+            {this.props.error ? null : (
+              <>
+                <View
+                  style={{
+                    position: 'relative',
+                    height: this.props.height,
+                    width: this.props.width,
+                  }}>
+                  <View
+                    key="left"
+                    style={{
+                      height: this.props.height + 80,
+                      backgroundColor: 'rgba(0,0,0,.5)',
+                      width: sideWidth,
+                      left: 0,
+                      position: 'absolute',
+                      top: 0,
+                    }}
+                  />
+                  <View
+                    key="right"
+                    style={{
+                      height: this.props.height + 80,
+                      backgroundColor: 'rgba(0,0,0,.5)',
+                      width: sideWidth,
+                      right: 0,
+                      position: 'absolute',
+                      top: 0,
+                    }}
+                  />
+                  <View
+                    key="top"
+                    style={{
+                      marginHorizontal: sideWidth,
+                      width: this.props.markerSize,
+                      backgroundColor: 'rgba(0,0,0,.5)',
+                      height: verticals + 40,
+                      top: 0,
+                      position: 'absolute',
+                    }}
+                  />
+                  <View
+                    key="bottom"
+                    style={{
+                      marginHorizontal: sideWidth,
+                      width: this.props.markerSize,
+                      backgroundColor: 'rgba(0,0,0,.5)',
+                      height: verticals + 40,
+                      bottom: -80,
+                      position: 'absolute',
+                    }}
+                  />
+                  {this.onClose && (
+                    <Icon
+                      name="close-circle-outline"
+                      type={Platform.select({
+                        ios: 'ionicon',
+                        android: 'material-community',
+                      })}
+                      size={40}
+                      color="black"
+                      containerStyle={{
+                        position: 'absolute',
+                        top: verticals - 40,
+                        right: sideWidth - 40,
+                      }}
+                      onPress={this.onClose}
+                    />
+                  )}
+                </View>
+              </>
             )}
-          </View>
+          </>
         }
         customMarker={
           <View>
-            <QRCodeMask width={this.props.markerSize} color={'black'} />
-            <Text style={{...style.center, textAlign: 'center'}}>
-              Move closer to scan
-            </Text>
+            {this.props.error ? (
+              <View
+                style={{height: this.props.height, width: this.props.width}}
+              />
+            ) : (
+              <>
+                <QRCodeMask width={this.props.markerSize} color={'black'} />
+                <Text style={{...style.center, textAlign: 'center'}}>
+                  Move closer to scan
+                </Text>
+              </>
+            )}
           </View>
         }
-        showMarker={true}
+        showMarker={!this.props.error}
         bottomContent={this.props.bottomContent}
         bottomViewStyle={{
           position: 'absolute',

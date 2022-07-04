@@ -25,6 +25,7 @@ export const Pages = {
   INTERVAL: 'Interval',
   THEME: 'Theme',
   SETTINGS: 'Settings',
+  LOGS_SCREEN: 'Logs',
 } as const;
 
 /**

@@ -14,7 +14,7 @@ const Logs = React.memo(() => {
 
   const styles = useMemo(
     () => ({
-      scroll: {marginTop: 10},
+      scroll: {marginTop: 10, height: '90%'},
       body: {
         flex: 1,
         borderWidth: 1,

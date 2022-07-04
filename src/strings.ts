@@ -59,6 +59,8 @@ const Strings = {
     },
     QRCode: {
       Manually: 'Connect manually',
+      Error:
+        'The QR code you have scanned is not an Azure IoT Central Device QR code. Please look at logs for detailed cause of the issue. Try restarting the application if this continues to occur.',
     },
     Manual: {
       Title: 'Manually connect',

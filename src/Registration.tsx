@@ -34,6 +34,7 @@ import {
   useTheme,
   useBoolean,
   usePrevious,
+  useLogger,
 } from 'hooks';
 import {
   NavigationParams,
@@ -122,36 +123,47 @@ export const Registration = React.memo<{
     }
   }, [client, loading, parentNavigator, previousLoading]);
 
-  if (error && loading) {
-    Alert.alert(
-      'Error',
-      'The QR code you have scanned is not an Azure IoT Central Device QR code',
-      [
-        {
-          text: 'Retry',
-          onPress: async () => {
-            await cancel({clear: false});
-            qrcodeRef.current?.reactivate();
+  useEffect(() => {
+    if (error) {
+      Alert.alert(
+        'Error',
+        Strings.Registration.QRCode.Error,
+        [
+          {
+            text: 'Retry',
+            onPress: async () => {
+              await cancel({clear: false});
+              qrcodeRef.current?.reactivate();
+            },
           },
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-          onPress: async () => {
-            await cancel({clear: false});
-            parentNavigator?.dispatch(
-              CommonActions.navigate({
-                name: screens.EMPTY,
-              }),
-            );
+          {
+            text: 'Show logs',
+            onPress: async () => {
+              await cancel({clear: false});
+              qrcodeRef.current?.reactivate();
+              parentNavigator?.push('Logs');
+            },
           },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: async () => {
+              await cancel({clear: false});
+              parentNavigator?.dispatch(
+                CommonActions.navigate({
+                  name: screens.EMPTY,
+                }),
+              );
+            },
+          },
+        ],
+        {
+          cancelable: false,
         },
-      ],
-      {
-        cancelable: false,
-      },
-    );
-  }
+      );
+    }
+  }, [cancel, parentNavigator, error]);
+
   return (
     <Stack.Navigator
       initialRouteName={
@@ -186,7 +198,13 @@ export const Registration = React.memo<{
            * If parent navigator is running, hide headers and footers.
            * For "EmptyClient" screen show immediate parent.
            */
-          return <QRCodeScreen scannerRef={qrcodeRef} connect={connect} />;
+          return (
+            <QRCodeScreen
+              error={error}
+              scannerRef={qrcodeRef}
+              connect={connect}
+            />
+          );
         }}
       </Stack.Screen>
       <Stack.Screen
@@ -207,41 +225,60 @@ type QRCodeScannerProps = {
     encryptedCredentials: string,
     options?: ConnectionOptions,
   ) => Promise<void>;
+  error: any;
   scannerRef: React.MutableRefObject<QRCodeScanner | null>;
 };
 
-const QRCodeScreen = React.memo<QRCodeScannerProps>(({connect, scannerRef}) => {
-  const {screen, orientation} = useScreenDimensions();
-  const {navigate} =
-    useNavigation<
-      StackNavigationProp<any, typeof screens[keyof typeof screens]>
-    >();
+const QRCodeScreen = React.memo<QRCodeScannerProps>(
+  ({connect, error, scannerRef}) => {
+    const {screen, orientation} = useScreenDimensions();
+    const [, append] = useLogger();
+    const {navigate} =
+      useNavigation<
+        StackNavigationProp<any, typeof screens[keyof typeof screens]>
+      >();
 
-  const onRead = useCallback(
-    async (e: Event) => {
-      await connect(e.data);
-      // scannerRef.current?.reactivate(); // reactivate camera in order to make it available for other use (e.g. torch)
-    },
-    [connect],
-  );
-  return (
-    <QRCodeScanner
-      onRead={onRead}
-      ref={scannerRef}
-      width={screen.width}
-      height={screen.height}
-      markerSize={Math.floor(
-        (orientation === 'portrait' ? screen.width : screen.height) / 1.5,
-      )}
-      bottomContent={
-        <Button
-          onPress={() => navigate(screens.MANUAL)}
-          title={Strings.Registration.QRCode.Manually}
-        />
+    const onRead = useCallback(
+      async (e: Event) => {
+        append({
+          eventName: 'QR CODE SCAN',
+          eventData: `Raw scan result is: '${e.data}'.`,
+        });
+        await connect(e.data);
+        // scannerRef.current?.reactivate(); // reactivate camera in order to make it available for other use (e.g. torch)
+      },
+      [connect, append],
+    );
+
+    useEffect(() => {
+      if (error) {
+        append(error);
       }
-    />
-  );
-});
+    }, [append, error]);
+
+    return (
+      <>
+        <QRCodeScanner
+          error={error}
+          onRead={onRead}
+          ref={scannerRef}
+          width={screen.width}
+          height={screen.height}
+          markerSize={Math.floor(
+            (orientation === 'portrait' ? screen.width : screen.height) / 1.5,
+          )}
+          bottomContent={
+            <Button
+              onPress={() => navigate(screens.MANUAL)}
+              title={Strings.Registration.QRCode.Manually}
+            />
+          }
+        />
+        <Loader modal visible={error} />
+      </>
+    );
+  },
+);
 
 const ManualConnect = React.memo<{navigation: any; route: any}>(
   ({navigation, route}) => {

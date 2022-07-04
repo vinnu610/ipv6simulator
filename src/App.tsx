@@ -44,6 +44,7 @@ import Chart from 'Chart';
 import Strings from 'strings';
 import {Option} from 'components/options';
 import Options from 'components/options';
+import Logs from 'Logs';
 
 const Stack = createStackNavigator<NavigationPages>();
 
@@ -108,6 +109,7 @@ const Navigation = React.memo(() => {
         }}>
         {/* @ts-ignore */}
         <Stack.Screen name={Pages.ROOT} component={Home} />
+        <Stack.Screen name={Pages.LOGS_SCREEN} component={Logs} />
         <Stack.Screen name={Pages.REGISTRATION} component={Registration} />
         <Stack.Screen
           name={Pages.INSIGHT}

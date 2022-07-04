@@ -15,7 +15,7 @@ type ILoaderButton = {
 };
 
 interface ILoaderProps {
-  message: string;
+  message?: string;
   buttons?: ILoaderButton[];
   visible: boolean;
   modal?: boolean;
@@ -25,7 +25,7 @@ export function Loader(props: ILoaderProps) {
   const {colors, dark} = useTheme();
   const {screen} = useScreenDimensions();
 
-  const {visible, modal, style} = props;
+  const {visible, modal, style, message} = props;
   const overlayStyle = [
     ...[style],
     {
@@ -47,7 +47,9 @@ export function Loader(props: ILoaderProps) {
         isVisible={visible}
         overlayStyle={overlayStyle}
         backdropStyle={backdropStyle}>
-        <InnerLoader colors={colors} dark={dark} {...props} {...screen} />
+        {message && (
+          <InnerLoader colors={colors} dark={dark} {...props} {...screen} />
+        )}
       </Overlay>
     );
   }

@@ -92,6 +92,18 @@ export default function Settings() {
           },
         },
       },
+      {
+        title: 'Logs',
+        icon: 'document-text-outline',
+        action: {
+          type: 'expand',
+          fn: (navigation: PagesNavigator) => {
+            navigation.push('Logs', {
+              previousScreen: Pages.SETTINGS,
+            });
+          },
+        },
+      },
       // {
       //   title: Strings.Settings.Clear.Title,
       //   icon: 'trash-outline',
